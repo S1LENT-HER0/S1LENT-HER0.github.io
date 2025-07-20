@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="username">Username</string>
+    <string name="weight_tracker">Weight Tracker</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log In</string>
+    <string name="create_account">Create Account</string>
+    <string name="sms_permission">SMS Permission</string>
+    <string name="body_nyou_ve_hit_your_goal_congratulations">Body:\nYou\'ve hit your goal! Congratulations!</string>
+    <string name="allow_sms">Allow SMS</string>
+    <string name="request">Request</string>
+    <string name="weight_entries">Weight Entries</string>
+    <string name="enter_your_weight">Enter your weight</string>
+    <string name="add_entry">Add Entry</string>
+</resources>
