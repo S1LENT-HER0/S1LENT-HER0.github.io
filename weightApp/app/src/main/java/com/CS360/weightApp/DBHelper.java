@@ -9,48 +9,63 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context) {
-        super(context, "AppDatabase.db", null, 1); // either make or open the database
+        super(context, "AppDatabase.db", null, 2); // version increased to 2
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // set up both the users and the weight entries tables
+        // create both tables
         db.execSQL("CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)");
-        db.execSQL("CREATE TABLE items(id INTEGER PRIMARY KEY AUTOINCREMENT, item_name TEXT)");
+        db.execSQL("CREATE TABLE weights(id INTEGER PRIMARY KEY AUTOINCREMENT, dateIso TEXT, weight REAL, goalHit INTEGER, username TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-        // if things change, wipe and recreate (not ideal for prod, fine for this)
-        db.execSQL("DROP TABLE IF EXISTS users");
-        db.execSQL("DROP TABLE IF EXISTS items");
-        onCreate(db);
+        // handle migration from version 1 to 2
+        if (oldV == 1) {
+            // drop old items table if exists
+            db.execSQL("DROP TABLE IF EXISTS items");
+            // create new weights table
+            db.execSQL("CREATE TABLE weights(id INTEGER PRIMARY KEY AUTOINCREMENT, dateIso TEXT, weight REAL, goalHit INTEGER, username TEXT)");
+        }
     }
 
-    // used when I make a new account
+    // used when making a new account
     public boolean insertUser(String username, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("username", username);
         values.put("password", password);
-        return getWritableDatabase().insert("users", null, values) != -1;
+        return db.insert("users", null, values) != -1;
     }
 
-    // check if login info actually matches anything in DB
+    // check login credentials
     public boolean checkLogin(String username, String password) {
-        Cursor cursor = getReadableDatabase().rawQuery(
-                "SELECT * FROM users WHERE username=? AND password=?", new String[]{username, password});
-        return cursor.getCount() > 0;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM users WHERE username=? AND password=?",
+                new String[]{username, password});
+        boolean result = cursor.getCount() > 0;
+        cursor.close();
+        return result;
     }
 
-    // add a new weight entry to the table
-    public void insertItem(String item) {
+    // add new weight entry
+    public boolean insertWeight(String date, float weight, boolean goalHit, String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("item_name", item);
-        getWritableDatabase().insert("items", null, values);
+        values.put("dateIso", date);
+        values.put("weight", weight);
+        values.put("goalHit", goalHit ? 1 : 0);
+        values.put("username", username);
+        return db.insert("weights", null, values) != -1;
     }
 
-    // get all items in a format the recycler adapter expects
-    public Cursor getAllItems() {
-        return getReadableDatabase().rawQuery("SELECT id AS _id, item_name FROM items", null);
+    // get all weights for user
+    public Cursor getWeightsForUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery(
+                "SELECT id AS _id, dateIso, weight, goalHit FROM weights WHERE username=? ORDER BY dateIso DESC",
+                new String[]{username});
     }
 }

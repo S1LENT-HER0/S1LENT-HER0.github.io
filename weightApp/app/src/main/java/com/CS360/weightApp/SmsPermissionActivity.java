@@ -20,6 +20,16 @@ public class SmsPermissionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if we already have permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Skip to weights activity if permission already granted
+            startActivity(new Intent(this, WeightsActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_sms_perms);
 
         // grabbing the toggle and request button
@@ -32,7 +42,9 @@ public class SmsPermissionActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                         != PackageManager.PERMISSION_GRANTED) {
                     // ask for SMS permission
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, SMS_REQUEST_CODE);
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.SEND_SMS},
+                            SMS_REQUEST_CODE);
                 } else {
                     // if I already have permission, just send the text
                     sendSMS();
@@ -40,6 +52,7 @@ public class SmsPermissionActivity extends AppCompatActivity {
             } else {
                 // if I don't want SMS, just move on
                 startActivity(new Intent(this, WeightsActivity.class));
+                finish();
             }
         });
     }

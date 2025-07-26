@@ -7,10 +7,9 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 // this is the room database singleton
-@Database(entities = {WeightEntry.class}, version = 1, exportSchema = false)
+@Database(entities = {WeightEntry.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
-
-    private static volatile AppDatabase INSTANCE;
+    private static AppDatabase INSTANCE;
 
     public abstract WeightDao weightDao();
 
@@ -18,10 +17,9 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    // this builds the database
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "weight-db")
-                            .fallbackToDestructiveMigration()
+                            .fallbackToDestructiveMigration() // Add this line
                             .build();
                 }
             }

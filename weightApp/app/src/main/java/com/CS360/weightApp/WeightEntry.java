@@ -7,14 +7,15 @@ import androidx.annotation.NonNull;
 // this is the data model for a weight entry
 @Entity(tableName = "weights")
 public class WeightEntry {
-
     @PrimaryKey(autoGenerate = true)
     public long id;
 
     @NonNull
-    public String dateIso;  // this uses yyyy-MM-dd format
+    public String dateIso;
 
     public float weight;
-
     public boolean goalHit;
+
+    @NonNull
+    public String username; // Make sure this field exists
 }
