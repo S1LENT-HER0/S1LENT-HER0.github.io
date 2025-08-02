@@ -2,7 +2,6 @@ package com.CS360.weightApp;
 
 import android.app.Application;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -15,35 +14,40 @@ import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Locale;
 
-// this is the viewmodel that manages weight data and input validation
+// this is the viewmodel that manages weight data
 public class WeightViewModel extends AndroidViewModel {
     private final WeightRepository repo;
     private final MutableLiveData<String> inputError = new MutableLiveData<>(null);
     private final MutableLiveData<List<WeightEntry>> weightsData = new MutableLiveData<>();
 
+    // this creates the viewmodel
     public WeightViewModel(@NonNull Application app, String username) {
         super(app);
-        // initialize database with current user
         AppDatabase db = AppDatabase.getInstance(app);
-        repo = new WeightRepository(db.weightDao(), Executors.newSingleThreadExecutor(), username);
+        repo = new WeightRepository(
+                db.weightDao(),
+                db.userDao(),
+                Executors.newSingleThreadExecutor(),
+                username
+        );
 
-        // load user's weight data
+        // this loads the user's weight data
         repo.getAllWeights().observeForever(weights -> {
             weightsData.postValue(weights);
         });
     }
 
-    // expose user's weight data
+    // this gets the weight data
     public LiveData<List<WeightEntry>> getWeights() {
         return weightsData;
     }
 
-    // expose error messages
+    // this gets error messages
     public LiveData<String> getInputError() {
         return inputError;
     }
 
-    // add new weight for current user
+    // this adds a new weight entry
     public void addWeight(String rawValue) {
         if (rawValue == null || rawValue.trim().isEmpty()) {
             inputError.postValue("weight is required");
@@ -63,41 +67,71 @@ public class WeightViewModel extends AndroidViewModel {
         }
     }
 
-    // sort current user's data by date
+    // this sorts by date
     public void sortByDate() {
-        repo.getWeightsSortedByDate().observeForever(weights -> {
+        repo.getAllWeights().observeForever(weights -> {
             if (weights != null) weightsData.postValue(weights);
         });
     }
 
-    // sort current user's data by weight
+    // this sorts by weight
     public void sortByWeight() {
         repo.getWeightsSortedByWeight().observeForever(weights -> {
             if (weights != null) weightsData.postValue(weights);
         });
     }
 
-    // get weekly average for current user
-    public String getCurrentWeekAverage() {
+    // this calculates weekly average
+    public LiveData<String> getCurrentWeekAverage() {
+        MutableLiveData<String> result = new MutableLiveData<>();
         LocalDate now = LocalDate.now();
         LocalDate weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-        return repo.getPeriodAverageWithDetail(
-                weekStart.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                weekEnd.format(DateTimeFormatter.ISO_LOCAL_DATE)
-        );
+        String start = weekStart.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String end = weekEnd.format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+        LiveData<Double> avgLiveData = repo.getAverageForCurrentUser(start, end);
+        LiveData<Integer> daysLiveData = repo.getDaysWithDataCount(start, end);
+
+        avgLiveData.observeForever(avg -> {
+            daysLiveData.observeForever(days -> {
+                result.postValue(formatAverage(avg, days));
+            });
+        });
+
+        return result;
     }
 
-    // get monthly average for current user
-    public String getCurrentMonthAverage() {
+
+    // this calculates monthly average
+    public LiveData<String> getCurrentMonthAverage() {
+        MutableLiveData<String> result = new MutableLiveData<>();
         LocalDate now = LocalDate.now();
         LocalDate monthStart = now.with(TemporalAdjusters.firstDayOfMonth());
         LocalDate monthEnd = now.with(TemporalAdjusters.lastDayOfMonth());
 
-        return repo.getPeriodAverageWithDetail(
-                monthStart.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                monthEnd.format(DateTimeFormatter.ISO_LOCAL_DATE)
-        );
+        String start = monthStart.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String end = monthEnd.format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+        LiveData<Double> avgLiveData = repo.getAverageForCurrentUser(start, end);
+        LiveData<Integer> daysLiveData = repo.getDaysWithDataCount(start, end);
+
+        avgLiveData.observeForever(avg -> {
+            daysLiveData.observeForever(days -> {
+                result.postValue(formatAverage(avg, days));
+            });
+        });
+
+        return result;
+    }
+
+    // this formats the average string
+    private String formatAverage(Double avg, int days) {
+        if (avg != null && avg > 0 && days > 0) {
+            return String.format(Locale.getDefault(),
+                    "avg: %.1f lbs (%d days)", avg, days);
+        }
+        return "no data for period";
     }
 }

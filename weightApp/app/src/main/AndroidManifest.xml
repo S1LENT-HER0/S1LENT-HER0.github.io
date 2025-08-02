@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
+        android:name=".WeightApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,8 +17,9 @@
         android:theme="@style/Theme.MyApplication">
 
         <activity android:name=".SmsPermissionActivity" />
-        <activity android:name=".WeightsActivity" />
-
+        <activity android:name=".WeightsActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:exported="false" />
         <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

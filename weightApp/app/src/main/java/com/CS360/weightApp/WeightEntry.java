@@ -17,5 +17,11 @@ public class WeightEntry {
     public boolean goalHit;
 
     @NonNull
-    public String username; // Make sure this field exists
+    public String username; // this field stores the user's name
+
+    // this constructor is used by room
+    public WeightEntry() {
+        this.dateIso = "";
+        this.username = "";
+    }
 }
