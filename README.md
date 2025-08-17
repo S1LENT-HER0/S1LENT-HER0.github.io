@@ -35,7 +35,8 @@
 ### Enhancements
 - **Enhancement 1:** [View App](https://s1lent-her0.github.io/) | [Software Design Narrative](https://s1lent-her0.github.io/enhancements/software-design-narrative.html)  
 - **Enhancement 2:** [View App](https://s1lent-her0.github.io/) | [Algorithms Narrative](https://s1lent-her0.github.io/enhancements/algorithms-narrative.html)  
-- **Enhancement 3:** [View App](https://s1lent-her0.github.io/) | [Databases Narrative](https://s1lent-her0.github.io/enhancements/databases-narrative.html)  
+- **Enhancement 3:** [View App](https://s1lent-her0.github.io/) | [Databases Narrative](https://s1lent-her0.github.io/enhancements/databases-narrative.html)
+- **Final:** [Final Branch](https://github.com/S1LENT-HER0/S1LENT-HER0.github.io/tree/final-eportfolio)  
 
 ---
 
