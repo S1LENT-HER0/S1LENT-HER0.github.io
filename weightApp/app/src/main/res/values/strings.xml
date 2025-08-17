@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Simple Weight Tracker</string>
     <string name="username">Username</string>
     <string name="weight_tracker">Weight Tracker</string>
     <string name="password">Password</string>
